@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password & QR Code Generator</title>
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #0056b3;
+            margin-bottom: 2rem;
+        }
+        .generator-section {
+            margin-bottom: 2.5rem;
+        }
+        h2 {
+            border-bottom: 2px solid #0056b3;
+            padding-bottom: 8px;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        /* --- Input & Button Styling --- */
+        .input-group {
+            display: flex;
+            margin-bottom: 1rem;
+        }
+        input[type="text"], input[type="number"] {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #0056b3;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .copy-btn {
+            margin-left: 10px;
+            background-color: #28a745;
+        }
+        .copy-btn:hover {
+            background-color: #218838;
+        }
+        .generate-btn {
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        /* --- Password Generator Specifics --- */
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+        }
+        .option label {
+            margin-left: 8px;
+            user-select: none;
+        }
+        #password-result {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .length-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        #length-slider {
+            width: 100%;
+        }
+
+        /* --- QR Code Generator Specifics --- */
+        #qrcode {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1.5rem;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 200px;
+        }
+        #qrcode canvas {
+            border-radius: 6px;
+        }
+        #qrcode img {
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Generator Suite</h1>
+
+        <div class="generator-section">
+            <h2>Secure Password Generator</h2>
+            <div class="input-group">
+                <input type="text" id="password-result" readonly placeholder="Your new password...">
+                <button class="copy-btn" id="copy-button">Copy</button>
+            </div>
+            <div class="length-container">
+                <label for="length-slider">Length: <span id="length-value">16</span></label>
+                <input type="range" id="length-slider" min="8" max="64" value="16">
+            </div>
+            <div class="options">
+                <div class="option">
+                    <input type="checkbox" id="uppercase" checked>
+                    <label for="uppercase">Uppercase (A-Z)</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="lowercase" checked>
+                    <label for="lowercase">Lowercase (a-z)</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="numbers" checked>
+                    <label for="numbers">Numbers (0-9)</label>
+                </div>
+                <div class="option">
+                    <input type="checkbox" id="symbols" checked>
+                    <label for="symbols">Symbols (!@#$)</label>
+                </div>
+            </div>
+            <button class="generate-btn" id="generate-password-btn">Generate Password</button>
+        </div>
+
+        <div class="generator-section">
+            <h2>QR Code Generator</h2>
+            <div class="input-group">
+                <input type="text" id="qr-input" placeholder="Enter text or URL...">
+            </div>
+             <button class="generate-btn" id="generate-qr-btn">Generate QR Code</button>
+            <div id="qrcode">Your QR code will appear here</div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    
+    <script>
+        // --- Password Generator Logic ---
+        const passwordResultEl = document.getElementById('password-result');
+        const copyButtonEl = document.getElementById('copy-button');
+        const lengthSliderEl = document.getElementById('length-slider');
+        const lengthValueEl = document.getElementById('length-value');
+        const uppercaseEl = document.getElementById('uppercase');
+        const lowercaseEl = document.getElementById('lowercase');
+        const numbersEl = document.getElementById('numbers');
+        const symbolsEl = document.getElementById('symbols');
+        const generatePasswordBtn = document.getElementById('generate-password-btn');
+
+        const charSets = {
+            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lowercase: 'abcdefghijklmnopqrstuvwxyz',
+            numbers: '0123456789',
+            symbols: '!@#$%^&*()_+~`|}{[]:;?><,./-='
+        };
+
+        lengthSliderEl.addEventListener('input', (e) => {
+            lengthValueEl.innerText = e.target.value;
+        });
+
+        generatePasswordBtn.addEventListener('click', generatePassword);
+        
+        copyButtonEl.addEventListener('click', () => {
+            const password = passwordResultEl.value;
+            if (!password) return;
+
+            navigator.clipboard.writeText(password).then(() => {
+                copyButtonEl.innerText = 'Copied!';
+                setTimeout(() => {
+                    copyButtonEl.innerText = 'Copy';
+                }, 2000);
+            });
+        });
+
+        function generatePassword() {
+            const length = +lengthSliderEl.value;
+            let allChars = '';
+            let generatedPassword = '';
+
+            if (uppercaseEl.checked) allChars += charSets.uppercase;
+            if (lowercaseEl.checked) allChars += charSets.lowercase;
+            if (numbersEl.checked) allChars += charSets.numbers;
+            if (symbolsEl.checked) allChars += charSets.symbols;
+
+            if (allChars === '') {
+                alert('Please select at least one character type!');
+                return;
+            }
+
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.floor(Math.random() * allChars.length);
+                generatedPassword += allChars[randomIndex];
+            }
+            passwordResultEl.value = generatedPassword;
+        }
+        
+        // Generate a password on page load
+        generatePassword();
+
+
+        // --- QR Code Generator Logic ---
+        const qrInputEl = document.getElementById('qr-input');
+        const generateQrBtn = document.getElementById('generate-qr-btn');
+        const qrcodeContainer = document.getElementById('qrcode');
+        let qrCode = null;
+
+        function generateQRCode() {
+            const text = qrInputEl.value.trim();
+            if (text === '') {
+                alert('Please enter text or a URL.');
+                return;
+            }
+            
+            // Clear previous QR code
+            qrcodeContainer.innerHTML = '';
+
+            // Create new QR Code
+            qrCode = new QRCode(qrcodeContainer, {
+                text: text,
+                width: 200,
+                height: 200,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+        }
+        
+        generateQrBtn.addEventListener('click', generateQRCode);
+
+    </script>
+
+</body>
+</html>
