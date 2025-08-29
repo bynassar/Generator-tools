@@ -3,275 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password & QR Code Generator</title>
+    <title>QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
-        /* --- General Styling --- */
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f0f2f5;
-            color: #1c1e21;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
             box-sizing: border-box;
         }
-        .container {
-            max-width: 500px;
-            width: 100%;
-            background-color: #ffffff;
-            padding: 2.5rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #0056b3;
-            margin-bottom: 2rem;
-        }
-        .generator-section {
-            margin-bottom: 2.5rem;
-        }
-        h2 {
-            border-bottom: 2px solid #0056b3;
-            padding-bottom: 8px;
-            margin-bottom: 1.5rem;
-            color: #333;
-        }
-
-        /* --- Input & Button Styling --- */
-        .input-group {
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             display: flex;
-            margin-bottom: 1rem;
-        }
-        input[type="text"], input[type="number"] {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #0056b3;
-        }
-        button {
-            padding: 12px 20px;
-            border: none;
-            background-color: #007bff;
-            color: white;
-            font-size: 1rem;
-            font-weight: bold;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .copy-btn {
-            margin-left: 10px;
-            background-color: #28a745;
-        }
-        .copy-btn:hover {
-            background-color: #218838;
-        }
-        .generate-btn {
-            width: 100%;
-            margin-top: 1rem;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
         
-        /* --- Password Generator Specifics --- */
-        .options {
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .title {
+            color: #333;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 1rem;
-        }
-        .option {
-            display: flex;
-            align-items: center;
-        }
-        .option label {
-            margin-left: 8px;
-            user-select: none;
-        }
-        #password-result {
-            background-color: #e9ecef;
-            font-weight: bold;
-        }
-        .length-container {
-            display: flex;
-            align-items: center;
             gap: 15px;
+            margin-bottom: 25px;
         }
-        #length-slider {
+        
+        .generate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             width: 100%;
+            margin-bottom: 30px;
         }
-
-        /* --- QR Code Generator Specifics --- */
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .qr-result {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .qr-result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
         #qrcode {
+            margin: 20px 0;
             display: flex;
             justify-content: center;
-            align-items: center;
-            margin-top: 1.5rem;
-            padding: 15px;
-            background: #f8f9fa;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 25px;
             border-radius: 8px;
-            min-height: 200px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
         }
-        #qrcode canvas {
-            border-radius: 6px;
+        
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
         }
-        #qrcode img {
-            border-radius: 6px;
+        
+        .type-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .type-btn {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .type-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .type-btn:hover {
+            border-color: #667eea;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-
     <div class="container">
-        <h1>Generator Suite</h1>
-
-        <div class="generator-section">
-            <h2>Secure Password Generator</h2>
-            <div class="input-group">
-                <input type="text" id="password-result" readonly placeholder="Your new password...">
-                <button class="copy-btn" id="copy-button">Copy</button>
-            </div>
-            <div class="length-container">
-                <label for="length-slider">Length: <span id="length-value">16</span></label>
-                <input type="range" id="length-slider" min="8" max="64" value="16">
-            </div>
-            <div class="options">
-                <div class="option">
-                    <input type="checkbox" id="uppercase" checked>
-                    <label for="uppercase">Uppercase (A-Z)</label>
-                </div>
-                <div class="option">
-                    <input type="checkbox" id="lowercase" checked>
-                    <label for="lowercase">Lowercase (a-z)</label>
-                </div>
-                <div class="option">
-                    <input type="checkbox" id="numbers" checked>
-                    <label for="numbers">Numbers (0-9)</label>
-                </div>
-                <div class="option">
-                    <input type="checkbox" id="symbols" checked>
-                    <label for="symbols">Symbols (!@#$)</label>
-                </div>
-            </div>
-            <button class="generate-btn" id="generate-password-btn">Generate Password</button>
+        <h1 class="title">QR Generator</h1>
+        <p class="subtitle">Create custom QR codes instantly</p>
+        
+        <div class="type-selector">
+            <button class="type-btn active" data-type="text">Text</button>
+            <button class="type-btn" data-type="url">URL</button>
+            <button class="type-btn" data-type="email">Email</button>
+            <button class="type-btn" data-type="phone">Phone</button>
         </div>
-
-        <div class="generator-section">
-            <h2>QR Code Generator</h2>
+        
+        <div class="input-group">
+            <label for="content" id="contentLabel">Enter your text:</label>
+            <textarea id="content" placeholder="Type your text here..."></textarea>
+        </div>
+        
+        <div class="options-grid">
             <div class="input-group">
-                <input type="text" id="qr-input" placeholder="Enter text or URL...">
+                <label for="size">Size (pixels):</label>
+                <select id="size">
+                    <option value="200">200x200</option>
+                    <option value="300" selected>300x300</option>
+                    <option value="400">400x400</option>
+                    <option value="500">500x500</option>
+                </select>
             </div>
-             <button class="generate-btn" id="generate-qr-btn">Generate QR Code</button>
-            <div id="qrcode">Your QR code will appear here</div>
+            
+            <div class="input-group">
+                <label for="color">Color:</label>
+                <select id="color">
+                    <option value="#000000">Black</option>
+                    <option value="#667eea">Blue</option>
+                    <option value="#28a745">Green</option>
+                    <option value="#dc3545">Red</option>
+                    <option value="#6f42c1">Purple</option>
+                </select>
+            </div>
+        </div>
+        
+        <button class="generate-btn" onclick="generateQR()">Generate QR Code</button>
+        
+        <div class="qr-result" id="qrResult">
+            <h3 style="color: #333; margin-bottom: 15px;">Your QR Code</h3>
+            <div id="qrcode"></div>
+            <button class="download-btn" onclick="downloadQR()">Download PNG</button>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    
     <script>
-        // --- Password Generator Logic ---
-        const passwordResultEl = document.getElementById('password-result');
-        const copyButtonEl = document.getElementById('copy-button');
-        const lengthSliderEl = document.getElementById('length-slider');
-        const lengthValueEl = document.getElementById('length-value');
-        const uppercaseEl = document.getElementById('uppercase');
-        const lowercaseEl = document.getElementById('lowercase');
-        const numbersEl = document.getElementById('numbers');
-        const symbolsEl = document.getElementById('symbols');
-        const generatePasswordBtn = document.getElementById('generate-password-btn');
-
-        const charSets = {
-            uppercase: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-            lowercase: 'abcdefghijklmnopqrstuvwxyz',
-            numbers: '0123456789',
-            symbols: '!@#$%^&*()_+~`|}{[]:;?><,./-='
-        };
-
-        lengthSliderEl.addEventListener('input', (e) => {
-            lengthValueEl.innerText = e.target.value;
-        });
-
-        generatePasswordBtn.addEventListener('click', generatePassword);
+        let currentQRCode = null;
+        let currentType = 'text';
         
-        copyButtonEl.addEventListener('click', () => {
-            const password = passwordResultEl.value;
-            if (!password) return;
-
-            navigator.clipboard.writeText(password).then(() => {
-                copyButtonEl.innerText = 'Copied!';
-                setTimeout(() => {
-                    copyButtonEl.innerText = 'Copy';
-                }, 2000);
+        // Type selector functionality
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentType = this.dataset.type;
+                updateInputPlaceholder();
             });
         });
-
-        function generatePassword() {
-            const length = +lengthSliderEl.value;
-            let allChars = '';
-            let generatedPassword = '';
-
-            if (uppercaseEl.checked) allChars += charSets.uppercase;
-            if (lowercaseEl.checked) allChars += charSets.lowercase;
-            if (numbersEl.checked) allChars += charSets.numbers;
-            if (symbolsEl.checked) allChars += charSets.symbols;
-
-            if (allChars === '') {
-                alert('Please select at least one character type!');
-                return;
+        
+        function updateInputPlaceholder() {
+            const content = document.getElementById('content');
+            const label = document.getElementById('contentLabel');
+            
+            switch(currentType) {
+                case 'url':
+                    label.textContent = 'Enter URL:';
+                    content.placeholder = 'https://example.com';
+                    break;
+                case 'email':
+                    label.textContent = 'Enter email:';
+                    content.placeholder = 'someone@example.com';
+                    break;
+                case 'phone':
+                    label.textContent = 'Enter phone number:';
+                    content.placeholder = '+1234567890';
+                    break;
+                default:
+                    label.textContent = 'Enter your text:';
+                    content.placeholder = 'Type your text here...';
             }
-
-            for (let i = 0; i < length; i++) {
-                const randomIndex = Math.floor(Math.random() * allChars.length);
-                generatedPassword += allChars[randomIndex];
-            }
-            passwordResultEl.value = generatedPassword;
         }
         
-        // Generate a password on page load
-        generatePassword();
-
-
-        // --- QR Code Generator Logic ---
-        const qrInputEl = document.getElementById('qr-input');
-        const generateQrBtn = document.getElementById('generate-qr-btn');
-        const qrcodeContainer = document.getElementById('qrcode');
-        let qrCode = null;
-
-        function generateQRCode() {
-            const text = qrInputEl.value.trim();
-            if (text === '') {
-                alert('Please enter text or a URL.');
+        function generateQR() {
+            const content = document.getElementById('content').value.trim();
+            const size = parseInt(document.getElementById('size').value);
+            const color = document.getElementById('color').value;
+            
+            if (!content) {
+                alert('Please enter some content to generate a QR code!');
                 return;
             }
             
+            let qrContent = content;
+            
+            // Format content based on type
+            switch(currentType) {
+                case 'url':
+                    if (!content.startsWith('http://') && !content.startsWith('https://')) {
+                        qrContent = 'https://' + content;
+                    }
+                    break;
+                case 'email':
+                    qrContent = 'mailto:' + content;
+                    break;
+                case 'phone':
+                    qrContent = 'tel:' + content;
+                    break;
+            }
+            
             // Clear previous QR code
-            qrcodeContainer.innerHTML = '';
-
-            // Create new QR Code
-            qrCode = new QRCode(qrcodeContainer, {
-                text: text,
-                width: 200,
-                height: 200,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
+            document.getElementById('qrcode').innerHTML = '';
+            
+            // Generate new QR code
+            QRCode.toCanvas(qrContent, {
+                width: size,
+                height: size,
+                color: {
+                    dark: color,
+                    light: '#FFFFFF'
+                },
+                margin: 2,
+                errorCorrectionLevel: 'M'
+            }, function (error, canvas) {
+                if (error) {
+                    alert('Error generating QR code: ' + error);
+                    return;
+                }
+                
+                currentQRCode = canvas;
+                document.getElementById('qrcode').appendChild(canvas);
+                document.getElementById('qrResult').classList.add('show');
+                
+                // Smooth scroll to result
+                document.getElementById('qrResult').scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'nearest' 
+                });
             });
         }
         
-        generateQrBtn.addEventListener('click', generateQRCode);
-
+        function downloadQR() {
+            if (!currentQRCode) {
+                alert('Please generate a QR code first!');
+                return;
+            }
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = 'qrcode.png';
+            link.href = currentQRCode.toDataURL();
+            link.click();
+        }
+        
+        // Allow Enter key to generate QR code
+        document.getElementById('content').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                generateQR();
+            }
+        });
     </script>
-
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97688ddd144e1894',t:'MTc1NjQzMzg2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
